@@ -130,8 +130,83 @@ const getProductById = async (req, res) => {
   }
 };
 
+// PUT Update general product details (name, price, etc.)
+const updateProduct = async (req, res) => {
+  const { id } = req.params;
+  const { sku, name, description, price, category_id, supplier_id } = req.body;
+
+  try {
+    const queryText = `
+      UPDATE products
+      SET sku = $1, name = $2, description = $3, price = $4, category_id = $5, supplier_id = $6
+      WHERE id = $7
+      RETURNING *
+    `;
+    const values = [
+      sku,
+      name,
+      description,
+      price,
+      category_id,
+      supplier_id,
+      id,
+    ];
+    const result = await pool.query(queryText, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    if (err.code === "23505") {
+      return res
+        .status(400)
+        .json({ error: "A product with this SKU already exists" });
+    }
+    res
+      .status(500)
+      .json({ error: "Internal server error updating product details" });
+  }
+};
+
+// PATCH Update stock quantities (Restock or Deduct)
+const updateStock = async (req, res) => {
+  const { id } = req.params;
+  const { quantity_change } = req.body; // Can be positive (restock) or negative (sale)
+
+  try {
+    const queryText = `
+      UPDATE inventory_stock
+      SET quantity = quantity + $1
+      WHERE product_id = $2
+      RETURNING *
+    `;
+    const result = await pool.query(queryText, [quantity_change, id]);
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "Stock ledger not found for this product" });
+    }
+
+    res.json({
+      message: "Stock updated successfully",
+      stock: result.rows[0],
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Internal server error updating stock quantities" });
+  }
+};
+
 module.exports = {
   getAllProducts,
   createProduct,
   getProductById,
+  updateProduct,
+  updateStock,
 };
