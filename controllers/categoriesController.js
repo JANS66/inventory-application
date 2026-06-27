@@ -85,8 +85,39 @@ const getCategoryById = async (req, res) => {
   }
 };
 
+// PUT Update a category
+const updateCategory = async (req, res) => {
+  const { id } = req.params;
+  const { name, description } = req.body;
+
+  try {
+    const queryText = `
+      UPDATE categories
+      SET name = $1, description = $2
+      WHERE id = $3
+      RETURNING *
+    `;
+    const result = await pool.query(queryText, [name, description, id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    if (err.code === "23505") {
+      return res
+        .status(400)
+        .json({ error: "A category with this name already exists" });
+    }
+    res.status(500).json({ error: "Internal server error updating category" });
+  }
+};
+
 module.exports = {
   getAllCategories,
   createCategory,
   getCategoryById,
+  updateCategory,
 };

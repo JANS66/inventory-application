@@ -8,6 +8,8 @@ router.get("/", categoriesController.getAllCategories);
 // GET /api/categories/:id -> Fetches details for one specific category + its products
 router.get("/:id", categoriesController.getCategoryById);
 
+router.put("/:id", categoriesController.updateCategory);
+
 // POST /api/categories
 router.post("/", categoriesController.createCategory);
 

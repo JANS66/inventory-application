@@ -8,4 +8,6 @@ router.get("/", suppliersController.getAllSuppliers);
 // POST /api/suppliers
 router.post("/", suppliersController.createSupplier);
 
+router.put("/:id", suppliersController.updateSupplier);
+
 module.exports = router;
