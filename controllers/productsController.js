@@ -8,11 +8,15 @@ const pool = new Pool({
 // 1. GET all products
 const getAllProducts = async (req, res) => {
   try {
-    // We use a JOIN to automatically pull the category name along with the product
+    // Added second JOIN to pull the quantity from inventory_stock
     const queryText = `
-            SELECT p.*, c.name AS category_name
+            SELECT 
+              p.*, 
+              c.name AS category_name,
+              s.quantity AS stock_quantity
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
+            LEFT JOIN inventory_stock s ON p.id = s.product_id
         `;
     const result = await pool.query(queryText);
     res.json(result.rows);
