@@ -10,6 +10,8 @@ router.get("/:id", categoriesController.getCategoryById);
 
 router.put("/:id", categoriesController.updateCategory);
 
+router.delete("/:id", categoriesController.deleteCategory);
+
 // POST /api/categories
 router.post("/", categoriesController.createCategory);
 

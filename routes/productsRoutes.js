@@ -11,6 +11,8 @@ router.get("/:id", productsController.getProductById);
 // PUT /api/products/:id => Full update of product fields
 router.put("/:id", productsController.updateProduct);
 
+router.delete("/:id", productsController.deleteProduct);
+
 // PATCH /api/products/:id/stock -> Micro adjustment to stock numbers
 router.patch("/:id/stock", productsController.updateStock);
 
