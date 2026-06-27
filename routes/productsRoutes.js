@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const productsController = require("../controllers/productController");
+const productsController = require("../controllers/productsController");
 
 // GET /api/products -> Fetches all products
 router.get("/", productsController.getAllProducts);
