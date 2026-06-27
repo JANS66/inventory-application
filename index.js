@@ -21,6 +21,7 @@ app.get("/", (req, res) => {
   res.send("Inventory API is up and running!");
 });
 
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error("Global Error Triggered:", err.stack);
   res
