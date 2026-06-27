@@ -21,6 +21,13 @@ app.get("/", (req, res) => {
   res.send("Inventory API is up and running!");
 });
 
+app.use((err, req, res, next) => {
+  console.error("Global Error Triggered:", err.stack);
+  res
+    .status(500)
+    .json({ error: "Something went completely wrong under the hood!" });
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
