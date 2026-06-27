@@ -97,7 +97,41 @@ const createProduct = async (req, res) => {
   }
 };
 
+// GET a single product by ID (with all joined data)
+const getProductById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const queryText = `
+      SELECT
+        p.*,
+        c.name AS category_name,
+        s.quantity AS stock_quantity,
+        sup.name AS supplier_name
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN inventory_stock s ON p.id = s.product_id
+      LEFT JOIN suppliers sup ON p.supplier_id = sup.id
+      WHERE p.id = $1
+    `;
+    const result = await pool.query(queryText, [id]);
+
+    // If no product matches that ID, return a 404
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Internal server error fetching product details" });
+  }
+};
+
 module.exports = {
   getAllProducts,
   createProduct,
+  getProductById,
 };
