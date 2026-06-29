@@ -6,6 +6,7 @@ const categoriesRoutes = require("./routes/categoriesRoutes");
 const suppliersRoutes = require("./routes/suppliersRoutes");
 
 const app = express();
+app.use(express.static("public"));
 const port = process.env.PORT;
 
 // Middleware to parse JSON bodies
