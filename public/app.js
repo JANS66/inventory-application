@@ -87,25 +87,68 @@ async function deleteProduct(id) {
 }
 
 // Toggle visibility of the Add Product Modal and instantly clear fields
-function toggleFormModal() {
+async function toggleFormModal() {
   const modal = document.getElementById("product-modal");
-
-  // 1. Toggle the hidden utility class layout
   modal.classList.toggle("hidden");
 
-  // 2. FORCE clear the input text strings every time the modal state shifts
+  // Clear out inputs whenever closing or initializing
   document.getElementById("product-form").reset();
+
+  // If opening the modal, fetch dynamic list items from database to fill selections
+  if (!modal.classList.contains("hidden")) {
+    const catSelect = document.getElementById("form-category");
+    const supSelect = document.getElementById("form-supplier");
+    catSelect.innerHTML = '<option value="">-- No Category --</option>';
+    supSelect.innerHTML = '<option value="">-- No Supplier --</option>';
+
+    try {
+      const [catRes, supRes] = await Promise.all([
+        fetch("/api/categories"),
+        fetch("/api/suppliers"),
+      ]);
+
+      if (catRes.ok) {
+        const categories = await catRes.json();
+        categories.forEach((c) => {
+          const opt = document.createElement("option");
+          opt.value = c.id;
+          opt.textContent = c.name;
+          catSelect.appendChild(opt);
+        });
+      }
+
+      if (supRes.ok) {
+        const suppliers = await supRes.json();
+        suppliers.forEach((s) => {
+          const opt = document.createElement("option");
+          opt.value = s.id;
+          opt.textContent = s.name;
+          supSelect.appendChild(opt);
+        });
+      }
+    } catch (error) {
+      console.error("Failed loading options for add product dropdowns:", error);
+    }
+  }
 }
 
-// Intercept form submission and send a POST request with payload object
+// Transmit Upgraded Payload to POST endpoint
 async function submitProductForm(event) {
   event.preventDefault(); // Stop native HTML page refreshing reload behavior
 
-  // Gather values safely from the clean form input
+  // Build the complete body parameters mapping object
   const payload = {
     sku: document.getElementById("form-sku").value.trim(),
     name: document.getElementById("form-name").value.trim(),
     price: parseFloat(document.getElementById("form-price").value),
+    description:
+      document.getElementById("form-description").value.trim() || null,
+    category_id: document.getElementById("form-category").value
+      ? parseInt(document.getElementById("form-category").value)
+      : null,
+    supplier_id: document.getElementById("form-supplier").value
+      ? parseInt(document.getElementById("form-supplier").value)
+      : null,
   };
 
   try {
@@ -123,7 +166,6 @@ async function submitProductForm(event) {
     } else {
       // Process error data structure returned by backend router validations
       const errorData = await response.json();
-
       // Map out exact response errors back to the interface alert
       const messages = errorData.errors
         ? errorData.errors.map((err) => err.msg).join("\n")
