@@ -141,6 +141,8 @@ async function submitProductForm(event) {
     sku: document.getElementById("form-sku").value.trim(),
     name: document.getElementById("form-name").value.trim(),
     price: parseFloat(document.getElementById("form-price").value),
+    initial_quantity:
+      parseInt(document.getElementById("form-quantity").value) || 0,
     description:
       document.getElementById("form-description").value.trim() || null,
     category_id: document.getElementById("form-category").value
