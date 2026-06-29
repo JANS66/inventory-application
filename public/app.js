@@ -27,7 +27,14 @@ async function fetchProducts() {
 
       const nameCell = document.createElement("td");
       nameCell.className = "p-4 font-medium text-gray-900";
-      nameCell.textContent = product.name;
+
+      const nameLink = document.createElement("button");
+      nameLink.className =
+        "text-blue-600 hover:underline text-left font-semibold";
+      nameLink.textContent = product.name;
+      nameLink.onclick = () => viewProductDetails(product.id); // Triggers GET /:id
+
+      nameCell.appendChild(nameLink);
 
       const priceCell = document.createElement("td");
       priceCell.className = "p-4 font-medium text-emerald-600";
@@ -179,5 +186,78 @@ async function submitEditForm(event) {
   } catch (error) {
     console.error("Error executing update command:", error);
     alert("Could not reach backend to execute update.");
+  }
+}
+
+function toggleDetailModal() {
+  document.getElementById("detail-modal").classList.toggle("hidden");
+}
+
+// Core Implementation of Get (/:id) Endpoint
+async function viewProductDetails(productId) {
+  try {
+    const response = await fetch(`/api/products/${productId}`);
+    if (!response.ok) throw new Error("Could not retrieve signle data record");
+
+    const product = await response.json();
+
+    // Bind values straight to the modal DOM elements safely
+    document.getElementById("detail-product-id").value = product.id;
+    document.getElementById("detail-title").textContent = product.name;
+    document.getElementById("detail-sku").textContent = product.sku;
+    document.getElementById("detail-category").textContent =
+      product.category_name || "Uncategorized";
+    document.getElementById("detail-supplier").textContent =
+      product.supplier_name || "No Vendor Linked";
+    document.getElementById("detail-description").textContent =
+      product.description ||
+      "No supplemental details document provided for this catalog listing.";
+    document.getElementById("detail-stock").textContent =
+      product.quantity !== null ? product.quantity : "0";
+
+    toggleDetailModal();
+  } catch (error) {
+    console.error(
+      "Pipeline failure executing individual product fetching:",
+      error,
+    );
+    alert("Unable to populate resource blueprint specifications.");
+  }
+}
+
+// Core Implementation of PATCH Endpoint for Stock Control
+async function submitStockPatch(event) {
+  event.preventDefault();
+
+  const id = document.getElementById("detail-product-id").value;
+  const adjustmentValue = parseInt(
+    document.getElementById("patch-stock-quantity").value,
+  );
+
+  const payload = {
+    quantity_change: adjustmentValue, // Sending the difference number (+10 or -5)
+  };
+
+  try {
+    const response = await fetch(`/api/products/${id}/stock`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      document.getElementById("patch-stock-quantity").value = ""; // clear input
+
+      // Real time double update refresh loop
+      await viewProductDetails(id); // Reload the modal contents to see the new stock number
+      fetchProducts();
+    } else {
+      alert("Rejected by backend server system rules.");
+    }
+  } catch (error) {
+    console.error(
+      "Communication blackout routing stock modification commands:",
+      error,
+    );
   }
 }

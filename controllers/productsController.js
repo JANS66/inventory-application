@@ -106,12 +106,12 @@ const getProductById = async (req, res) => {
       SELECT
         p.*,
         c.name AS category_name,
-        s.quantity AS stock_quantity,
-        sup.name AS supplier_name
+        s.name AS supplier_name,
+        i.quantity
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN inventory_stock s ON p.id = s.product_id
-      LEFT JOIN suppliers sup ON p.supplier_id = sup.id
+      LEFT JOIN suppliers s ON p.supplier_id = s.id
+      LEFT JOIN inventory_stock i ON p.id = i.product_id
       WHERE p.id = $1
     `;
     const result = await pool.query(queryText, [id]);
