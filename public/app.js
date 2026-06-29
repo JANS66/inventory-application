@@ -144,24 +144,80 @@ function toggleEditModal() {
   modal.classList.toggle("hidden");
 }
 
-// 2. Open Edit Modal and pre-fill fields with current database values
-function openEditModal(product) {
+// 2. Open Edit Modal, download relational items, and fill all inputs
+async function openEditModal(product) {
+  // Clear any old dynamically generated select dropdown inputs
+  const catSelect = document.getElementById("edit-form-category");
+  const supSelect = document.getElementById("edit-form-supplier");
+  catSelect.innerHTML = '<option value="">-- No Category --</option>';
+  supSelect.innerHTML = '<option value="">-- No Supplier --</option>';
+
+  try {
+    // Parallel fetch active categories and suppliers list streams
+    const [catRes, supRes] = await Promise.all([
+      fetch("/api/categories"),
+      fetch("/api/suppliers"),
+    ]);
+
+    if (catRes.ok) {
+      const categories = await catRes.json();
+      categories.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = c.name;
+        catSelect.appendChild(opt);
+      });
+    }
+
+    if (supRes.ok) {
+      const suppliers = await supRes.json();
+      suppliers.forEach((s) => {
+        const opt = document.createElement("option");
+        opt.value = s.id;
+        opt.textContent = s.name;
+        supSelect.appendChild(opt);
+      });
+    }
+  } catch (error) {
+    console.error("Failed loading options for dropdown elements:", error);
+  }
+
+  // Bind values from table object dataset row into form inputs
   document.getElementById("edit-form-id").value = product.id;
   document.getElementById("edit-form-sku").value = product.sku;
   document.getElementById("edit-form-name").value = product.name;
   document.getElementById("edit-form-price").value = product.price;
+  document.getElementById("edit-form-description").value =
+    product.description || "";
+
+  // Set the dropdown selections to match current IDs (or empty if null)
+  document.getElementById("edit-form-category").value =
+    product.category_id || "";
+  document.getElementById("edit-form-supplier").value =
+    product.supplier_id || "";
 
   toggleEditModal();
 }
 
+// Transmit the complete upgraded payload back to Express PUT router rules
 async function submitEditForm(event) {
   event.preventDefault();
 
   const id = document.getElementById("edit-form-id").value;
+
+  // Package EVERY field value into body payload object
   const payload = {
     sku: document.getElementById("edit-form-sku").value.trim(),
     name: document.getElementById("edit-form-name").value.trim(),
     price: parseFloat(document.getElementById("edit-form-price").value),
+    description:
+      document.getElementById("edit-form-description").value.trim() || null,
+    category_id: document.getElementById("edit-form-category").value
+      ? parseInt(document.getElementById("edit-form-category").value)
+      : null,
+    supplier_id: document.getElementById("edit-form-supplier").value
+      ? parseInt(document.getElementById("edit-form-supplier").value)
+      : null,
   };
 
   try {
