@@ -34,7 +34,13 @@ async function fetchProducts() {
       priceCell.textContent = `$${parseFloat(product.price).toFixed(2)}`;
 
       const actionCell = document.createElement("td");
-      actionCell.className = "p-4 text-center";
+      actionCell.className = "p-4 text-center space-x-2";
+
+      const editBtn = document.createElement("button");
+      editBtn.className =
+        "bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium px-3 py-1 rounded transition text-sm";
+      editBtn.textContent = "Edit";
+      editBtn.onclick = () => openEditModal(product);
 
       const deleteBtn = document.createElement("button");
       deleteBtn.className =
@@ -42,6 +48,7 @@ async function fetchProducts() {
       deleteBtn.textContent = "Delete";
       deleteBtn.onclick = () => deleteProduct(product.id);
 
+      actionCell.appendChild(editBtn);
       actionCell.appendChild(deleteBtn);
 
       row.appendChild(skuCell);
@@ -122,5 +129,55 @@ async function submitProductForm(event) {
       error,
     );
     alert("Could not reach back-end servers to process record.");
+  }
+}
+// Toggle visibility of the Edit Modal
+function toggleEditModal() {
+  const modal = document.getElementById("edit-modal");
+  modal.classList.toggle("hidden");
+}
+
+// 2. Open Edit Modal and pre-fill fields with current database values
+function openEditModal(product) {
+  document.getElementById("edit-form-id").value = product.id;
+  document.getElementById("edit-form-sku").value = product.sku;
+  document.getElementById("edit-form-name").value = product.name;
+  document.getElementById("edit-form-price").value = product.price;
+
+  toggleEditModal();
+}
+
+async function submitEditForm(event) {
+  event.preventDefault();
+
+  const id = document.getElementById("edit-form-id").value;
+  const payload = {
+    sku: document.getElementById("edit-form-sku").value.trim(),
+    name: document.getElementById("edit-form-name").value.trim(),
+    price: parseFloat(document.getElementById("edit-form-price").value),
+  };
+
+  try {
+    const response = await fetch(`/api/products/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      toggleEditModal();
+      fetchProducts();
+    } else {
+      const errorData = await response.json();
+      const messages = errorData.errors
+        ? errorData.errors.map((err) => err.msg).join("\n")
+        : "Failed to update product.";
+      alert(`Validation Blocked Request:\n\n${messages}`);
+    }
+  } catch (error) {
+    console.error("Error executing update command:", error);
+    alert("Could not reach backend to execute update.");
   }
 }
