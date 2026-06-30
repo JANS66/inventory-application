@@ -61,6 +61,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       "detail-modal-container",
       "/components/modal-product-detail.html",
     ),
+    loadComponent(
+      "category-add-container",
+      "/components/modal-category-add.html",
+    ),
   ]);
 
   // Initialize default view state

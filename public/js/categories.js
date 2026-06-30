@@ -181,11 +181,59 @@ export async function deleteCategory(id, productCount) {
   }
 }
 
+// Toggle visibility of the Add Category Modal and clear input states
 export function toggleCategoryFormModal() {
-  alert("Add category modal layout");
+  const modal = document.getElementById("category-add-modal");
+  if (!modal) return;
+
+  modal.classList.toggle("hidden");
+
+  // Clear out input values whenever closing or initializing
+  document.getElementById("category-form").reset();
 }
+
+// Transmit Category Data Payload to POST endpoint securely
+export async function submitCategoryForm(event) {
+  event.preventDefault(); // Halt native page reload behavior
+
+  // Package inputs safely
+  const payload = {
+    name: document.getElementById("category-form-name").value.trim(),
+    description:
+      document.getElementById("category-form-description").value.trim() || null,
+  };
+
+  try {
+    const response = await fetch("/api/categories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      toggleCategoryFormModal(); // Close form upon completion
+      fetchCategories(); // Instantly update the view with the fresh entry
+    } else {
+      const errorData = await response.json();
+      const messages = errorData.errors
+        ? errorData.errors.map((err) => err.msg).join("\n")
+        : "Failed to create category configuration.";
+      alert(`Validation Blocked Request:\n\n${messages}`);
+    }
+  } catch (error) {
+    console.error(
+      "Communication failure routing category upload channel:",
+      error,
+    );
+    alert("Could not communicate with server infrastructure.");
+  }
+}
+
 export function openCategoryEditModal(cat) {
   alert(`Edit workflow requested for: ${cat.name}`);
 }
 
 window.toggleCategoryFormModal = toggleCategoryFormModal;
+window.submitCategoryForm = submitCategoryForm;
