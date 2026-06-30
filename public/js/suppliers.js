@@ -152,3 +152,55 @@ function toggleSuppliersDrawer(supplierId) {
   const drawer = document.getElementById(`sup-drawer-${supplierId}`);
   if (drawer) drawer.classList.toggle("hidden");
 }
+
+// Toggle Visibility of Onboarding Modal
+export function toggleSupplierFormModal() {
+  const modal = document.getElementById("supplier-add-modal");
+  if (!modal) return;
+
+  modal.classList.toggle("hidden");
+  document.getElementById("supplier-form").reset();
+}
+
+// Transmit Supplier Payload to POST Endpoint
+export async function submitSupplierForm(event) {
+  event.preventDefault();
+
+  const payload = {
+    name: document.getElementById("supplier-form-name").value.trim(),
+    contact_email:
+      document.getElementById("supplier-form-email").value.trim() || null,
+    phone: document.getElementById("supplier-form-phone").value.trim() || null,
+  };
+
+  try {
+    const response = await fetch("/api/suppliers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      toggleSupplierFormModal(); // Hide form
+      fetchSuppliers(); // Reload layout grid instantly
+    } else {
+      const errorData = await response.json();
+      const messages = errorData.errors
+        ? errorData.errors.map((err) => err.msg).join("\n")
+        : "Failed to onboard supplier entry.";
+      alert(`Validation Guard Block:\n\n${messages}`);
+    }
+  } catch (error) {
+    console.error(
+      "Network communication fault routing supplier payload:",
+      error,
+    );
+    alert("Could not reach back-end servers.");
+  }
+}
+
+// Bind methods to global scope for HTML inline accessors
+window.toggleSupplierFormModal = toggleSupplierFormModal;
+window.submitSupplierForm = submitSupplierForm;
