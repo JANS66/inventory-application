@@ -124,16 +124,44 @@
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold text-gray-700">Supplier Registry</h2>
           <button
-            onclick="alert('Supplier onboarding setup initializing coming')"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition shadow-sm"
+            onclick="
+              alert(
+                'Onboarding pipeline configurations initialization coming up next step!',
+              )
+            "
+            class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg transition shadow-sm animate-pulse"
           >
             + Onboard Supplier
           </button>
         </div>
+
         <div
-          class="bg-white rounded-xl shadow-md border border-gray-200 p-8 text-center text-gray-500"
+          class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200"
         >
-          Suppliers loading...
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-100 border-b border-gray-200">
+              <tr>
+                <th class="p-4 font-semibold text-gray-600">Company Name</th>
+                <th class="p-4 font-semibold text-gray-600">
+                  Communications Channels
+                </th>
+                <th class="p-4 font-semibold text-gray-600">Catalog Volume</th>
+                <th class="p-4 font-semibold text-gray-600 text-center">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody id="suppliers-table-body">
+              <tr>
+                <td
+                  colspan="5"
+                  class="p-8 text-center text-gray-400 animate-pulse"
+                >
+                  Loading operational fulfillment register profiles...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </main>

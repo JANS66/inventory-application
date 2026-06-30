@@ -8,13 +8,37 @@ const pool = new Pool({
 // 1. GET all suppliers
 const getAllSuppliers = async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT * FROM suppliers ORDER BY name ASC",
-    );
+    const complexQueryText = `
+      SELECT
+        s.id,
+        s.name,
+        s.contact_email,
+        s.phone,
+        COUNT(p.id)::int AS product_count,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', p.id,
+              'sku', p.sku,
+              'name', p.name,
+              'quantity', COALESCE(i.quantity, 0)
+            )
+          ) FILTER (WHERE p.id IS NOT NULL), '[]'
+        ) AS products
+      FROM suppliers s
+      LEFT JOIN products p ON s.id = p.supplier_id
+      LEFT JOIN inventory_stock i ON p.id = i.product_id
+      GROUP BY s.id
+      ORDER BY s.name ASC;
+    `;
+
+    const result = await pool.query(complexQueryText);
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error fetching suppliers" });
+    console.error("Database error compiling supplier analytics:", err);
+    res.status(500).json({
+      error: "Internal server error fetching suppliers inventory summary",
+    });
   }
 };
 
