@@ -5,18 +5,38 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-// 1. GET all categories
+// 1. GET all categories (with aggregated product counts and items)
 const getAllCategories = async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT * FROM categories ORDER BY name ASC",
-    );
+    const complexQueryText = `
+      SELECT
+        c.id,
+        c.name,
+        c.description,
+        COUNT(p.id)::int AS product_count,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', p.id,
+              'sku', p.sku,
+              'name', p.name,
+              'price', p.price
+            )
+          ) FILTER (WHERE p.id IS NOT NULL), '[]'
+        ) AS products
+      FROM categories c
+      LEFT JOIN products p ON c.id = p.category_id
+      GROUP BY c.id
+      ORDER BY c.name ASC;
+    `;
+
+    const result = await pool.query(complexQueryText);
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    console.error("Database error compiling category analytics:", err);
     res
       .status(500)
-      .json({ error: "Internal server error fetching categories" });
+      .json({ error: "Internal server error fetching categories summary" });
   }
 };
 

@@ -1,4 +1,5 @@
 import { fetchProducts } from "./js/products.js";
+import { fetchCategories } from "./js/categories.js";
 
 // Async component loader tool
 async function loadComponent(elementId, filePath) {
@@ -36,7 +37,7 @@ function switchView(targetView) {
 
       // Trigger lazy loaded data refreshes upon choosing views
       if (tab === "products") fetchProducts();
-      if (tab === "categories") console.log("Will fetch categories...");
+      if (tab === "categories") fetchCategories();
     } else {
       // Inactive Configurations
       btn.className =

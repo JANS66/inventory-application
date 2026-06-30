@@ -86,16 +86,37 @@
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold text-gray-700">Inventory Categories</h2>
           <button
-            onclick="alert('Category creation setup initialization coming')"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition shadow-sm"
+            onclick="toggleCategoryFormModal()"
+            class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-lg transition shadow-sm"
           >
             + Add New Category
           </button>
         </div>
         <div
-          class="bg-white rounded-xl shadow-md border border-gray-200 p-8 text-center text-gray-500"
+          class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200"
         >
-          Categories dashboard data management table loading...
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-100 border-b border-gray-200">
+              <tr>
+                <th class="p-4 font-semibold text-gray-600">Category Name</th>
+                <th class="p-4 font-semibold text-gray-600">Description</th>
+                <th class="p-4 font-semibold text-gray-600">Stock Count</th>
+                <th class="p-4 font-semibold text-gray-600 text-center">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody id="categories-table-body">
+              <tr>
+                <td
+                  colspan="4"
+                  class="p-8 text-center text-gray-400 animate-pulse"
+                >
+                  Loading catalog hierarchy schemas...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
