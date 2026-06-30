@@ -65,6 +65,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       "category-add-container",
       "/components/modal-category-add.html",
     ),
+    loadComponent(
+      "category-edit-container",
+      "/components/modal-category-edit.html",
+    ),
   ]);
 
   // Initialize default view state

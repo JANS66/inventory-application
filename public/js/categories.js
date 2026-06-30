@@ -231,9 +231,61 @@ export async function submitCategoryForm(event) {
   }
 }
 
-export function openCategoryEditModal(cat) {
-  alert(`Edit workflow requested for: ${cat.name}`);
+// Toggle visibility of the Edit Category Modal
+export function toggleCategoryEditModal() {
+  const modal = document.getElementById("category-edit-modal");
+  if (modal) modal.classList.toggle("hidden");
+}
+
+// Open Edit Category Modal and safely map existing values to input fields
+export function openCategoryEditModal(category) {
+  document.getElementById("category-edit-form-id").value = category.id;
+  document.getElementById("category-edit-form-name").value = category.name;
+  document.getElementById("category-edit-form-description").value =
+    category.description || "";
+
+  toggleCategoryEditModal();
+}
+
+export async function submitCategoryEditForm(event) {
+  event.preventDefault();
+
+  const id = document.getElementById("category-edit-form-id").value;
+  const payload = {
+    name: document.getElementById("category-edit-form-name").value.trim(),
+    description: document
+      .getElementById("category-edit-form-description")
+      .value.trim(),
+  };
+
+  try {
+    const response = await fetch(`/api/categories/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      toggleCategoryEditModal();
+      fetchCategories();
+    } else {
+      const errorData = await response.json();
+      const messages = errorData.errors
+        ? errorData.errors.map((err) => err.msg).join("\n")
+        : "Failed to update category data.";
+      alert(`Validation Blocked Request:\n\n${messages}`);
+    }
+  } catch (error) {
+    console.error(
+      "Communication failure routing category update channel:",
+      error,
+    );
+    alert("Could not reach backend server infrastructure.");
+  }
 }
 
 window.toggleCategoryFormModal = toggleCategoryFormModal;
 window.submitCategoryForm = submitCategoryForm;
+window.submitCategoryEditForm = submitCategoryEditForm;
