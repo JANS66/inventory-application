@@ -289,3 +289,4 @@ export async function submitCategoryEditForm(event) {
 window.toggleCategoryFormModal = toggleCategoryFormModal;
 window.submitCategoryForm = submitCategoryForm;
 window.submitCategoryEditForm = submitCategoryEditForm;
+window.toggleCategoryEditModal = toggleCategoryEditModal;

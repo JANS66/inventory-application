@@ -67,16 +67,7 @@ export async function fetchSuppliers() {
       editBtn.textContent = "Edit";
       editBtn.onclick = () => openSupplierEditModal(sup);
 
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className =
-        "bg-red-50 hover:bg-red-100 text-red-600 font-medium px-3 py-1 rounded transition text-sm";
-      deleteBtn.textContent = "Remove";
-      deleteBtn.onclick = () =>
-        alert("Deletion guard checking routing protocols...");
-
       actionCell.appendChild(editBtn);
-      actionCell.appendChild(deleteBtn);
-
       mainRow.appendChild(nameCell);
       mainRow.appendChild(commsCell);
       mainRow.appendChild(countCell);
@@ -263,3 +254,4 @@ export async function submitSupplierEditForm(event) {
 window.toggleSupplierFormModal = toggleSupplierFormModal;
 window.submitSupplierForm = submitSupplierForm;
 window.submitSupplierEditForm = submitSupplierEditForm;
+window.toggleSupplierEditModal = toggleSupplierEditModal;
