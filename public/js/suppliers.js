@@ -65,8 +65,7 @@ export async function fetchSuppliers() {
       editBtn.className =
         "bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium px-3 py-1 rounded transition text-sm";
       editBtn.textContent = "Edit";
-      editBtn.onclick = () =>
-        alert(`Edit setup initiated for vendor reference: ${sup.name}`);
+      editBtn.onclick = () => openSupplierEditModal(sup);
 
       const deleteBtn = document.createElement("button");
       deleteBtn.className =
@@ -201,6 +200,66 @@ export async function submitSupplierForm(event) {
   }
 }
 
+// Toggle visibility of the Edit Supplier Modal
+export function toggleSupplierEditModal() {
+  const modal = document.getElementById("supplier-edit-modal");
+  if (modal) modal.classList.toggle("hidden");
+}
+
+// Open Edit Modal and safely map existing row values to the form inputs
+export function openSupplierEditModal(supplier) {
+  document.getElementById("supplier-edit-form-id").value = supplier.id;
+  document.getElementById("supplier-edit-form-name").value = supplier.name;
+  document.getElementById("supplier-edit-form-email").value =
+    supplier.contact_email || "";
+  document.getElementById("supplier-edit-form-phone").value =
+    supplier.phone || "";
+
+  toggleSupplierEditModal();
+}
+
+// Package and transmit the updated data payload to PUT endpoint
+export async function submitSupplierEditForm(event) {
+  event.preventDefault();
+
+  const id = document.getElementById("supplier-edit-form-id").value;
+  const payload = {
+    name: document.getElementById("supplier-edit-form-name").value,
+    contact_email:
+      document.getElementById("supplier-edit-form-email").value.trim() || null,
+    phone:
+      document.getElementById("supplier-edit-form-phone").value.trim() || null,
+  };
+
+  try {
+    const response = await fetch(`/api/suppliers/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      (toggleSupplierEditModal(), // Hide modal upon success
+        fetchSuppliers()); // Reload data dashboard instantly
+    } else {
+      const errorData = await response.json();
+      const messages = errorData.errors
+        ? errorData.errors.map((err) => err.msg).join("\n")
+        : "Failed to update supplier profile.";
+      alert(`Validation Guard Block:\n\n${messages}`);
+    }
+  } catch (error) {
+    console.error(
+      "Network infrastructure communication fault routing PUT payload:",
+      error,
+    );
+    alert("Could not reach backend servers.");
+  }
+}
+
 // Bind methods to global scope for HTML inline accessors
 window.toggleSupplierFormModal = toggleSupplierFormModal;
 window.submitSupplierForm = submitSupplierForm;
+window.submitSupplierEditForm = submitSupplierEditForm;

@@ -75,6 +75,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       "supplier-add-container",
       "/components/modal-supplier-add.html",
     ),
+    loadComponent(
+      "supplier-edit-container",
+      "/components/modal-supplier-edit.html",
+    ),
   ]);
 
   // Initialize default view state
